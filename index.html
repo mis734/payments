@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html>
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<style>
+  :root{
+    --bg:#f5f7fb; --surface:#ffffff; --ink:#0f172a; --ink2:#334155; --muted:#64748b; --faint:#94a3b8;
+    --line:#e5e9f0; --line2:#eef1f6;
+    --brand:#0b2545; --brand2:#13315c; --accent:#2563eb; --accentbg:#eff4ff;
+    --amber:#b45309; --amberbg:#fff7e6; --amberln:#fde3b0;
+    --blue:#1d4ed8; --bluebg:#eaf1ff; --blueln:#c9dafd;
+    --green:#047857; --greenbg:#e8f8f1; --greenln:#b7ead4;
+    --red:#b91c1c; --redbg:#fdeeee; --redln:#f6c9c9;
+    --shadow:0 1px 2px rgba(15,23,42,.04),0 4px 16px rgba(15,23,42,.06);
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:Inter,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);font-size:14px;-webkit-font-smoothing:antialiased}
+  button{font-family:inherit}
+
+  /* ---------- Top bar ---------- */
+  .topbar{background:linear-gradient(120deg,var(--brand),var(--brand2));color:#fff}
+  .topbar-in{max-width:1180px;margin:0 auto;padding:18px 20px 74px;display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap}
+  .brand{display:flex;gap:12px;align-items:center}
+  .logo{width:42px;height:42px;border-radius:11px;background:rgba(255,255,255,.12);display:grid;place-items:center;border:1px solid rgba(255,255,255,.18)}
+  .brand h1{margin:0;font-size:19px;font-weight:700;letter-spacing:-.2px}
+  .brand p{margin:2px 0 0;font-size:12.5px;color:#c7d3e6}
+  .flow{display:flex;align-items:center;gap:8px;font-size:12px;color:#c7d3e6;flex-wrap:wrap}
+  .flow span{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);padding:5px 10px;border-radius:20px;color:#fff;font-weight:500}
+  .flow i{font-style:normal;opacity:.6}
+  .live{display:flex;align-items:center;gap:6px;font-size:12px;color:#c7d3e6;margin-top:10px;justify-content:flex-end}
+  .dot{width:7px;height:7px;border-radius:50%;background:#34d399;box-shadow:0 0 0 3px rgba(52,211,153,.25)}
+
+  .wrap{max-width:1180px;margin:-56px auto 40px;padding:0 20px}
+
+  /* ---------- KPI ---------- */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+  .kpi{background:var(--surface);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow);border:1px solid var(--line2);position:relative;overflow:hidden}
+  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c)}
+  .kpi .lbl{font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+  .kpi .num{font-size:26px;font-weight:800;margin-top:6px;letter-spacing:-.5px}
+  .kpi .sub{font-size:12.5px;color:var(--ink2);margin-top:2px;font-weight:500}
+
+  /* ---------- Nav ---------- */
+  .nav{display:flex;gap:4px;background:var(--surface);padding:5px;border-radius:12px;box-shadow:var(--shadow);border:1px solid var(--line2);margin-bottom:18px;overflow-x:auto}
+  .nav button{flex:1;white-space:nowrap;border:0;background:transparent;padding:11px 14px;border-radius:9px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:.15s}
+  .nav button:hover{color:var(--ink);background:var(--line2)}
+  .nav button.active{background:var(--brand);color:#fff}
+  .pill{min-width:22px;height:20px;padding:0 7px;border-radius:10px;background:var(--line);color:var(--ink2);font-size:11.5px;display:inline-grid;place-items:center;font-weight:700}
+  .nav button.active .pill{background:rgba(255,255,255,.2);color:#fff}
+  .pill.hot{background:#ef4444;color:#fff}
+
+  .view{display:none}.view.active{display:block;animation:fade .2s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+  /* ---------- Form ---------- */
+  .grid2{display:grid;grid-template-columns:1.35fr 1fr;gap:18px;align-items:start}
+  .panel{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--line2)}
+  .panel-h{padding:18px 22px;border-bottom:1px solid var(--line2);display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .panel-h h2{margin:0;font-size:15.5px;font-weight:700}
+  .panel-h p{margin:3px 0 0;color:var(--muted);font-size:12.5px}
+  .panel-b{padding:20px 22px}
+  .field{margin-bottom:16px}
+  .field label{display:block;font-size:12.5px;font-weight:600;color:var(--ink2);margin-bottom:7px}
+  .field label em{color:var(--red);font-style:normal}
+  .hint{font-size:12px;color:var(--muted);margin-top:6px;min-height:16px}
+  .ctl{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;font-family:inherit;background:#fff;color:var(--ink);transition:.15s}
+  .ctl:focus{outline:0;border-color:var(--accent);box-shadow:0 0 0 4px rgba(37,99,235,.12)}
+  .ctl.err{border-color:var(--red);box-shadow:0 0 0 4px rgba(185,28,28,.08)}
+  .money{position:relative}.money span{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:600}
+  .money .ctl{padding-left:28px;font-weight:600}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .people{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px}
+  @media (max-width:560px){.people{grid-template-columns:repeat(2,1fr)}}
+  .person{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;transition:.15s}
+  .person:hover{border-color:#b9c7dc;background:#fafcff}
+  .person.sel{border-color:var(--accent);background:var(--accentbg);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+  .av{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;font-weight:700;color:#fff;font-size:14px}
+  .person b{font-size:13.5px}
+  .froms{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  @media (max-width:700px){.froms{grid-template-columns:repeat(2,1fr)}}
+  .from{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:11px 8px;cursor:pointer;text-align:center;font-size:13px;font-weight:600;color:var(--ink2);transition:.15s}
+  .from:hover{border-color:#b9c7dc}
+  .from.sel{border-color:var(--accent);background:var(--accentbg);color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+  .tag.co{background:#f1f5ff;color:#1e3a8a}
+  .payers{display:flex;gap:8px;flex-wrap:wrap}
+  .payer{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:#fff;border-radius:22px;padding:6px 14px 6px 6px;cursor:pointer;font-weight:600;font-size:13.5px;color:var(--ink2);transition:.15s}
+  .payer .av{width:26px;height:26px;font-size:12px}
+  .payer small{font-weight:500;color:var(--muted);font-size:11.5px}
+  .payer.sel{border-color:var(--accent);background:var(--accentbg);color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
+  .quick{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .chip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:5px 11px;font-size:12px;font-weight:600;color:var(--ink2);cursor:pointer}
+  .chip:hover{border-color:var(--accent);color:var(--accent)}
+
+  .btn{border:0;border-radius:10px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:.15s}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .btn-primary{background:var(--brand);color:#fff}.btn-primary:hover:not(:disabled){background:var(--brand2)}
+  .btn-approve{background:var(--green);color:#fff}.btn-approve:hover:not(:disabled){filter:brightness(1.07)}
+  .btn-reject{background:#fff;color:var(--red);border:1px solid var(--redln)}.btn-reject:hover:not(:disabled){background:var(--redbg)}
+  .btn-ghost{background:#fff;color:var(--ink2);border:1px solid var(--line)}.btn-ghost:hover{background:var(--line2)}
+  .btn-block{width:100%;padding:13px}
+
+  /* Summary card */
+  .sumcard{position:sticky;top:16px}
+  .sumline{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px dashed var(--line);font-size:13.5px;gap:10px}
+  .sumline span{color:var(--muted)}.sumline b{text-align:right;word-break:break-word}
+  .bigamt{font-size:30px;font-weight:800;letter-spacing:-.6px;margin:2px 0}
+  .words{font-size:12.5px;color:var(--muted);font-style:italic;min-height:18px}
+  .steps{margin-top:16px;padding:14px;background:var(--line2);border-radius:10px;font-size:12.5px;color:var(--ink2);line-height:1.7}
+
+  /* ---------- Request cards ---------- */
+  .toolbar{display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+  .toolbar .ctl{width:auto;flex:1;min-width:150px;padding:9px 12px;font-size:13.5px}
+  .who{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--line2);box-shadow:var(--shadow);border-radius:12px;padding:12px 16px;margin-bottom:14px;flex-wrap:wrap}
+  .who .t{flex:1;min-width:200px}
+  .who b{font-size:14px}.who p{margin:2px 0 0;color:var(--muted);font-size:12.5px}
+  .lock{font-size:12px;font-weight:600;padding:5px 10px;border-radius:20px}
+  .lock.on{background:var(--greenbg);color:var(--green)}.lock.off{background:var(--line2);color:var(--muted)}
+
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+  .rc{background:var(--surface);border:1px solid var(--line2);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column}
+  .rc.overdue{border-color:var(--redln)}
+  .rc-h{padding:16px 18px 12px;display:flex;justify-content:space-between;gap:12px}
+  .rc-id{font-size:11.5px;font-weight:600;color:var(--faint);letter-spacing:.3px}
+  .rc-v{font-size:16px;font-weight:700;margin-top:3px;word-break:break-word}
+  .rc-a{font-size:20px;font-weight:800;letter-spacing:-.4px;text-align:right;white-space:nowrap}
+  .rc-meta{padding:0 18px 12px;display:flex;flex-wrap:wrap;gap:8px}
+  .tag{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:4px 9px;border-radius:7px;background:var(--line2);color:var(--ink2)}
+  .tag.due-over{background:var(--redbg);color:var(--red)}
+  .tag.due-soon{background:var(--amberbg);color:var(--amber)}
+  .drop{border:1.5px dashed #c5cfdd;border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;background:#fafcff;transition:.15s}
+  .drop:hover,.drop.over{border-color:var(--accent);background:var(--accentbg)}
+  .drop .ic{width:38px;height:38px;border-radius:10px;background:#e8eefb;display:grid;place-items:center;flex:none;font-size:18px}
+  .drop b{font-size:13.5px;display:block}.drop span{font-size:12px;color:var(--muted)}
+  .filechip{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:12px;padding:8px 10px;background:#fff}
+  .filechip img{width:44px;height:44px;object-fit:cover;border-radius:8px;border:1px solid var(--line)}
+  .filechip .pdf{width:44px;height:44px;border-radius:8px;background:#fdeeee;color:#b91c1c;display:grid;place-items:center;font-weight:800;font-size:11px}
+  .filechip .nm{flex:1;min-width:0}.filechip .nm b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.filechip .nm span{font-size:12px;color:var(--muted)}
+  .filechip button{border:0;background:var(--line2);border-radius:8px;padding:7px 10px;cursor:pointer;font-weight:600;color:var(--ink2)}
+  a.tag.att{background:#fff4e5;color:#9a3412;text-decoration:none}a.tag.att:hover{background:#ffe8cc}
+  .rc-notes{margin:0 18px 12px;padding:9px 12px;background:#fafbfd;border-left:3px solid var(--line);border-radius:6px;font-size:12.5px;color:var(--ink2)}
+  .track{display:flex;padding:12px 18px 14px;border-top:1px solid var(--line2);gap:0}
+  .tk{flex:1;position:relative;text-align:center;font-size:11px;color:var(--faint);font-weight:600}
+  .tk::before{content:"";position:absolute;top:10px;left:-50%;right:50%;height:2px;background:var(--line)}
+  .tk:first-child::before{display:none}
+  .tk .c{width:22px;height:22px;border-radius:50%;margin:0 auto 5px;background:#fff;border:2px solid var(--line);display:grid;place-items:center;position:relative;z-index:1;font-size:11px;color:#fff}
+  .tk.done{color:var(--ink2)}.tk.done .c{background:var(--green);border-color:var(--green)}
+  .tk.done::before{background:var(--green)}
+  .tk.rej{color:var(--red)}.tk.rej .c{background:var(--red);border-color:var(--red)}
+  .tk.now{color:var(--amber)}.tk.now .c{border-color:var(--amber);background:var(--amberbg)}
+  .tk small{display:block;font-weight:500;color:var(--faint);font-size:10.5px;margin-top:1px}
+  .rc-act{padding:12px 18px 16px;background:#fafbfd;border-top:1px solid var(--line2);display:flex;gap:8px;flex-wrap:wrap}
+  .rc-act .ctl{flex:1 1 100%;padding:9px 12px;font-size:13px}
+  .rc-act .btn{flex:1;padding:10px}
+
+  .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;font-size:11.5px;font-weight:700;border:1px solid}
+  .badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+  .b-pending{background:var(--amberbg);color:var(--amber);border-color:var(--amberln)}
+  .b-approved{background:var(--bluebg);color:var(--blue);border-color:var(--blueln)}
+  .b-paid{background:var(--greenbg);color:var(--green);border-color:var(--greenln)}
+  .b-rejected{background:var(--redbg);color:var(--red);border-color:var(--redln)}
+
+  /* ---------- Table ---------- */
+  .tablewrap{background:var(--surface);border:1px solid var(--line2);border-radius:var(--radius);box-shadow:var(--shadow);overflow:auto}
+  table{width:100%;border-collapse:collapse;min-width:820px}
+  th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;background:#fafbfd;padding:12px 14px;border-bottom:1px solid var(--line);cursor:pointer;user-select:none;white-space:nowrap}
+  th.num,td.num{text-align:right}
+  td{padding:12px 14px;border-bottom:1px solid var(--line2);font-size:13.5px;vertical-align:top}
+  tr:last-child td{border-bottom:0}
+  tbody tr{cursor:pointer}tbody tr:hover td{background:#f9fbff}
+  td .s{font-size:12px;color:var(--muted);margin-top:2px}
+  tfoot td{font-weight:700;background:#fafbfd;border-top:1px solid var(--line)}
+
+  .empty{text-align:center;padding:48px 20px;color:var(--muted);background:var(--surface);border:1px dashed var(--line);border-radius:var(--radius)}
+  .empty .ico{font-size:30px;margin-bottom:8px}
+  .empty b{display:block;color:var(--ink);font-size:15px;margin-bottom:4px}
+
+  /* ---------- Modal ---------- */
+  .scrim{position:fixed;inset:0;background:rgba(15,23,42,.45);display:none;align-items:center;justify-content:center;padding:16px;z-index:50;backdrop-filter:blur(2px)}
+  .scrim.open{display:flex}
+  .modal{background:#fff;border-radius:16px;width:100%;max-width:420px;box-shadow:0 20px 60px rgba(0,0,0,.25);animation:pop .18s ease}
+  @keyframes pop{from{transform:scale(.96);opacity:0}to{transform:none;opacity:1}}
+  .modal-h{padding:20px 22px 6px}.modal-h h3{margin:0;font-size:17px}.modal-h p{margin:6px 0 0;color:var(--muted);font-size:13px;line-height:1.5}
+  .modal-b{padding:14px 22px}
+  .modal-f{padding:14px 22px 20px;display:flex;gap:10px;justify-content:flex-end}
+  .pin{letter-spacing:10px;text-align:center;font-size:22px;font-weight:700}
+  .remember{display:flex;gap:8px;align-items:center;font-size:12.5px;color:var(--ink2);margin-top:10px}
+  .detail .sumline:last-child{border:0}
+
+  /* ---------- Toast ---------- */
+  #toasts{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px;z-index:60;max-width:calc(100% - 36px)}
+  .toast{background:var(--ink);color:#fff;padding:12px 16px;border-radius:10px;font-size:13.5px;font-weight:500;box-shadow:0 10px 30px rgba(0,0,0,.2);display:flex;gap:10px;align-items:center;animation:pop .2s ease;max-width:380px}
+  .toast.ok::before{content:"✓";background:#10b981;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;flex:none}
+  .toast.bad::before{content:"!";background:#ef4444;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:800;flex:none}
+  .banner{background:#fff7e6;border:1px solid var(--amberln);color:var(--amber);padding:10px 14px;border-radius:10px;font-size:12.5px;font-weight:600;margin-bottom:14px;display:none}
+
+  .spin{width:16px;height:16px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .skel{height:120px;border-radius:var(--radius);background:linear-gradient(90deg,#eef1f6 25%,#f6f8fb 50%,#eef1f6 75%);background-size:200% 100%;animation:sk 1.2s infinite}
+  @keyframes sk{to{background-position:-200% 0}}
+
+  @media (max-width:900px){.grid2{grid-template-columns:1fr}.sumcard{position:static}.kpis{grid-template-columns:repeat(2,1fr)}}
+  @media (max-width:560px){
+    .row{grid-template-columns:1fr}.cards{grid-template-columns:1fr}
+    .topbar-in{padding:14px 16px 66px}.wrap{padding:0 12px}.flow{display:none}.live{justify-content:flex-start}
+    .kpi .num{font-size:21px}.nav button{flex:none}.panel-b,.panel-h{padding-left:16px;padding-right:16px}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <div class="logo">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20M6 15h4"/></svg>
+      </div>
+      <div>
+        <h1>Payment Approvals</h1>
+        <p>Jain Wire India · Vendor payment workflow</p>
+      </div>
+    </div>
+    <div>
+      <div class="flow"><span>① Request</span><i>→</i><span>② Arun approves</span><i>→</i><span>③ Geyin pays</span></div>
+      <div class="live"><span class="dot"></span><span id="synced">Connecting…</span><span id="whoami"></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div class="banner" id="errBanner" style="background:#fdeeee;border-color:#f6c9c9;color:#b91c1c"></div>
+  <script>
+    /* early safety net: shows any error that stops the app from starting */
+    function __showErr(m) { var b = document.getElementById('errBanner'); if (b) { b.textContent = '⚠ ' + m; b.style.display = 'block'; } }
+    window.__firstErr = '';
+    function __diagnose() {            // finds the exact line of a broken script
+      try {
+        var el = document.getElementById('appMain'); if (!el) return ' [main script missing]';
+        var src = el.textContent, lines = src.split('\n'), full;
+        try { new Function(src); return ''; } catch (e) { full = e.message; }
+        for (var n = 1; n <= lines.length; n++) {
+          try { new Function(lines.slice(0, n).join('\n')); }
+          catch (e) { if (e.message === full && !/end of input|Unterminated template/i.test(e.message)) return ' → script line ' + n + ': ' + lines[n - 1].replace(/^\s+/, '').slice(0, 160); }
+        }
+        return ' (' + full + ')';
+      } catch (e) { return ''; }
+    }
+    window.onerror = function (msg, src, line, col) {
+      if (!window.__firstErr) { window.__firstErr = 'Page error: ' + msg; __showErr(window.__firstErr + __diagnose()); }
+    };
+    setTimeout(function () {
+      if (!window.__appStarted) __showErr((window.__firstErr || 'The app did not start.') + __diagnose() + ' — send this message to support.');
+    }, 8000);
+  </script>
+  <div class="banner" id="previewBanner">Preview mode — showing sample data. To connect to your Google Sheet, paste your Apps Script /exec link into API_URL in this file.</div>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="nav" id="nav">
+    <button data-v="new" class="active">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>New Request</button>
+    <button data-v="approve">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>Approvals <span class="pill" id="n-approve">0</span></button>
+    <button data-v="pay">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12M6 8h12M6 13l8.5 8M6 13h3a4 4 0 0 0 0-8"/></svg>Payments <span class="pill" id="n-pay">0</span></button>
+    <button data-v="all">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>All Requests</button>
+  </div>
+
+  <!-- ============ NEW REQUEST ============ -->
+  <section class="view active" id="v-new">
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-h"><div><h2>Raise a payment requirement</h2><p id="whoCan">Only Sachin, Mudit, Rajesh and Jobiya can raise requests.</p></div></div>
+        <div class="panel-b">
+          <div class="field">
+            <label>Who is raising this request? <em>*</em></label>
+            <div class="people" id="people"></div>
+          </div>
+          <div class="field">
+            <label for="vendor">Name of Vendor <em>*</em></label>
+            <input class="ctl" id="vendor" list="vendorList" placeholder="e.g. ABC Steels Pvt Ltd" autocomplete="off">
+            <datalist id="vendorList"></datalist>
+          </div>
+          <div class="field">
+            <label>Payment to be made from <em>*</em></label>
+            <div class="froms" id="froms"></div>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="amount">Amount <em>*</em></label>
+              <div class="money"><span>₹</span><input class="ctl" id="amount" type="number" min="1" step="0.01" placeholder="0.00" inputmode="decimal"></div>
+              <div class="hint" id="amtHint"></div>
+            </div>
+            <div class="field">
+              <label for="due">Payment due on <em>*</em></label>
+              <input class="ctl" id="due" type="date">
+              <div class="quick">
+                <button class="chip" data-d="0">Today</button>
+                <button class="chip" data-d="1">Tomorrow</button>
+                <button class="chip" data-d="7">In 7 days</button>
+                <button class="chip" data-d="eom">Month end</button>
+              </div>
+            </div>
+          </div>
+          <div class="field">
+            <label for="notes">Purpose / Notes</label>
+            <textarea class="ctl" id="notes" rows="3" placeholder="Invoice no., PO no., material, reason for payment…"></textarea>
+          </div>
+          <div class="field">
+            <label>Invoice / Screenshot <span style="font-weight:500;color:var(--muted)">(optional)</span></label>
+            <label class="drop" id="drop" for="fileIn">
+              <div class="ic">📎</div>
+              <div><b id="dropTitle">Attach invoices, bills or screenshots</b><span>Photos or PDFs · up to 5 files · 10 MB each · you can select several at once</span></div>
+            </label>
+            <input type="file" id="fileIn" accept="image/*,application/pdf" multiple hidden>
+            <div id="fileList" style="display:flex;flex-direction:column;gap:8px;margin-top:8px"></div>
+          </div>
+          <button class="btn btn-primary btn-block" id="submitBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg>
+            Submit for Approval
+          </button>
+        </div>
+      </div>
+
+      <div class="panel sumcard">
+        <div class="panel-h"><div><h2>Request summary</h2><p>Check before submitting</p></div></div>
+        <div class="panel-b">
+          <div class="bigamt" id="sAmt">₹0</div>
+          <div class="words" id="sWords">—</div>
+          <div class="sumline"><span>Requested by</span><b id="sBy">—</b></div>
+          <div class="sumline"><span>Vendor</span><b id="sVendor">—</b></div>
+          <div class="sumline"><span>Payment from</span><b id="sFrom">—</b></div>
+          <div class="sumline"><span>Attachment</span><b id="sFile">—</b></div>
+          <div class="sumline"><span>Due date</span><b id="sDue">—</b></div>
+          <div class="sumline"><span>Goes to</span><b id="sTo">Arun for approval</b></div>
+          <div class="steps"><b>What happens next</b><br>1. Arun approves or rejects the request.<br>2. Once approved, Geyin (or Arun, if Geyin is away) makes the payment and ticks it as paid.<br>3. You can track the status under <b>All Requests</b>.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ APPROVALS ============ -->
+  <section class="view" id="v-approve">
+    <div class="who">
+      <div class="av" id="apAv" style="background:#7c3aed">A</div>
+      <div class="t"><b id="apTitle">Arun · Approver</b><p id="apText">Approve or reject payment requests. You'll be asked for your PIN.</p></div>
+      <span class="lock off" id="lock-Arun">🔒 Locked</span>
+    </div>
+    <div class="who" style="padding:10px 16px">
+      <div class="t" style="min-width:120px"><b>Approving as</b></div>
+      <div class="payers" id="approvers"></div>
+    </div>
+    <div class="toolbar">
+      <select class="ctl" id="aSort"><option value="due">Sort: Due date (earliest)</option><option value="amt">Sort: Amount (highest)</option><option value="new">Sort: Newest first</option></select>
+    </div>
+    <div class="cards" id="approveList"></div>
+  </section>
+
+  <!-- ============ PAYMENTS ============ -->
+  <section class="view" id="v-pay">
+    <div class="who">
+      <div class="av" id="payAv" style="background:#0891b2">G</div>
+      <div class="t"><b id="payTitle">Geyin · Payments</b><p>Make the payment, then tick it here with the UTR / cheque number. If Geyin is away, Arun can pay.</p></div>
+      <span class="lock off" id="lock-pay">🔒 Locked</span>
+    </div>
+    <div class="who" style="padding:10px 16px">
+      <div class="t" style="min-width:120px"><b>Who is paying?</b></div>
+      <div class="payers" id="payers"></div>
+    </div>
+    <div class="toolbar">
+      <select class="ctl" id="pSort"><option value="due">Sort: Due date (earliest)</option><option value="amt">Sort: Amount (highest)</option><option value="new">Sort: Newest first</option></select>
+    </div>
+    <div class="cards" id="payList"></div>
+  </section>
+
+  <!-- ============ ALL ============ -->
+  <section class="view" id="v-all">
+    <div class="toolbar">
+      <input class="ctl" id="fSearch" placeholder="🔍  Search vendor, ID or notes">
+      <select class="ctl" id="fStatus"><option value="">All statuses</option><option>Pending Approval</option><option>Approved</option><option>Paid</option><option>Rejected</option></select>
+      <select class="ctl" id="fBy"><option value="">All requesters</option></select>
+      <select class="ctl" id="fFrom"><option value="">All companies</option></select>
+      <select class="ctl" id="fRange"><option value="">Any due date</option><option value="over">Overdue</option><option value="week">Due in 7 days</option><option value="month">Due this month</option></select>
+      <button class="btn btn-ghost" id="exportBtn">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Export</button>
+    </div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th data-k="id">Request</th><th data-k="vendor">Vendor</th><th data-k="by">Requested by</th><th data-k="payFrom">Pay from</th>
+          <th data-k="amount" class="num">Amount</th><th data-k="due">Due</th><th data-k="status">Status</th><th>Payment ref.</th>
+        </tr></thead>
+        <tbody id="allBody"></tbody>
+        <tfoot id="allFoot"></tfoot>
+      </table>
+    </div>
+  </section>
+</div>
+
+<!-- Sign-in screen -->
+<div class="scrim" id="loginScrim" style="z-index:70;background:rgba(11,37,69,.94)">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-h"><h3>Sign in · Payment Approvals</h3><p>Choose your name and enter your PIN.</p></div>
+    <div class="modal-b">
+      <div class="people" id="loginPeople"></div>
+      <input class="ctl pin" id="loginPin" type="password" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off" style="margin-top:14px">
+      <label class="remember" style="display:flex"><input type="checkbox" id="loginRemember"> Keep me signed in on this device</label>
+      <div id="loginErr" style="color:var(--red);font-size:13px;font-weight:600;min-height:18px;margin-top:8px"></div>
+    </div>
+    <div class="modal-f"><button class="btn btn-primary btn-block" id="loginBtn">Sign in</button></div>
+  </div>
+</div>
+
+<!-- PIN modal -->
+<div class="scrim" id="pinScrim">
+  <div class="modal">
+    <div class="modal-h"><h3 id="pinTitle">Enter PIN</h3><p id="pinText"></p></div>
+    <div class="modal-b">
+      <input class="ctl pin" id="pinInput" type="password" inputmode="numeric" maxlength="6" placeholder="••••" autocomplete="off">
+      <label class="remember" style="display:none"><input type="checkbox" id="pinRemember"> Keep me unlocked</label>
+    </div>
+    <div class="modal-f">
+      <button class="btn btn-ghost" id="pinCancel">Cancel</button>
+      <button class="btn btn-primary" id="pinOk">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Attachment viewer -->
+<div class="scrim" id="attScrim" style="z-index:55">
+  <div class="modal" style="max-width:860px">
+    <div class="modal-h"><h3 id="attTitle"></h3><p id="attSub"></p></div>
+    <div class="modal-b" id="attBody" style="max-height:68vh;overflow:auto"></div>
+    <div class="modal-f"><span id="attActions" style="display:flex;gap:8px;flex-wrap:wrap;margin-right:auto"></span><button class="btn btn-ghost" id="attClose">Close</button></div>
+  </div>
+</div>
+
+<!-- Detail modal -->
+<div class="scrim" id="detScrim">
+  <div class="modal">
+    <div class="modal-h"><h3 id="detTitle"></h3><p id="detSub"></p></div>
+    <div class="modal-b detail" id="detBody"></div>
+    <div class="modal-f"><button class="btn btn-ghost" id="detClose">Close</button></div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script type="text/plain" id="boot">__BOOT_DATA__</script>
+<script id="appMain">
+/* ---------------- Setup ---------------- */
+/* ==================== GITHUB SITE SETTING ====================
+   Paste your Apps Script web app link (ending in /exec) between the quotes.
+   Leave it empty inside Apps Script — it is only used by the GitHub copy.     */
+const API_URL = '';
+/* ============================================================= */
+const GAS = typeof google !== 'undefined' && google.script && google.script.run;
+const API = !GAS && /^https:\/\/script\.google\.com\/.+\/exec$/.test(API_URL.trim());
+const LIVE = !!(GAS || API);
+let SESSION = null, refreshTimer = null;          // SESSION = { name, pin } of the signed-in person
+let CFG = { requesters:['Sachin','Mudit','Rajesh','Jobiya','Arun'], altApprovers:{ Arun:'Sachin' }, payFrom:['Jain Wire EKM','Jain Wire CLT','Jain Wire Kannur','Best Bond'], approver:'Arun', payer:'Geyin', payers:['Geyin','Arun'] };
+let selPayer = 'Geyin', selApprover = 'Arun';
+const approverOf = by => (CFG.altApprovers || {})[by] || CFG.approver;
+const approverList = () => [...new Set([CFG.approver].concat(Object.values(CFG.altApprovers || {})))];
+let DATA = [], selName = '', selFrom = '', sortK = 'due', sortDir = 1;
+const PINS = {};                                        // remembered for this page only
+const COLORS = { Sachin:'#2563eb', Mudit:'#db2777', Rajesh:'#ea580c', Jobiya:'#16a34a', Arun:'#7c3aed', Geyin:'#0891b2' };
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const inr = n => '₹' + Number(n || 0).toLocaleString('en-IN', { maximumFractionDigits: 2 });
+const iso = d => { const x = new Date(d); x.setMinutes(x.getMinutes() - x.getTimezoneOffset()); return x.toISOString().slice(0, 10); };
+const today = () => iso(new Date());
+const nice = s => { if (!s) return '—'; const [y,m,d] = s.split('-'); return new Date(y, m-1, d).toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }); };
+const daysTo = s => { if (!s) return null; const [y,m,d] = s.split('-'); const t = new Date(); t.setHours(0,0,0,0); return Math.round((new Date(y, m-1, d) - t) / 864e5); };
+
+function showError(msg) {
+  const b = $('errBanner'); if (!b) return;
+  b.innerHTML = '⚠ ' + esc(msg) + ' &nbsp;<a href="#" onclick="location.reload();return false" style="color:inherit;font-weight:700">Reload</a>';
+  b.style.display = 'block';
+}
+window.addEventListener('error', e => showError('Page error: ' + (e.message || e)));
+window.addEventListener('unhandledrejection', e => showError('Error: ' + ((e.reason && e.reason.message) || e.reason)));
+function callT(fn, ms, ...a) {        // server call with a time limit, so the page never hangs silently
+  return Promise.race([call(fn, ...a), new Promise((_, rej) => setTimeout(() => rej(new Error('The server did not respond within ' + ms / 1000 + ' seconds')), ms))]);
+}
+const ACTIONS = { getBootstrap:'bootstrap', getRequests:'requests', submitRequest:'submit', decideRequest:'decide',
+                  markPaid:'pay', getAttachment:'attachment', getConfig:'config', login:'login' };
+function call(fn, ...a) {
+  const req = { action: ACTIONS[fn] || fn, args: a, name: SESSION ? SESSION.name : '', pin: SESSION ? SESSION.pin : '' };
+  if (GAS) return new Promise((res, rej) => google.script.run.withSuccessHandler(res).withFailureHandler(rej).api(req));
+  return fetch(API_URL.trim(), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(req) })
+    .then(r => { if (!r.ok) throw new Error('Server error ' + r.status); return r.json(); })
+    .then(j => { if (!j.ok) throw new Error(j.error || 'Server error'); return j.result; });
+}
+function toast(msg, ok = true) {
+  const t = document.createElement('div'); t.className = 'toast ' + (ok ? 'ok' : 'bad'); t.textContent = msg;
+  $('toasts').appendChild(t); setTimeout(() => t.remove(), 3800);
+}
+
+/* Indian number to words */
+function words(num) {
+  num = Math.floor(Number(num) || 0); if (!num) return '';
+  const a = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const b = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  const two = n => n < 20 ? a[n] : b[Math.floor(n/10)] + (n%10 ? ' ' + a[n%10] : '');
+  const three = n => (n >= 100 ? a[Math.floor(n/100)] + ' Hundred' + (n%100 ? ' ' : '') : '') + (n%100 ? two(n%100) : '');
+  let out = '', cr = Math.floor(num/1e7); num %= 1e7;
+  const lk = Math.floor(num/1e5); num %= 1e5; const th = Math.floor(num/1e3); num %= 1e3;
+  if (cr) out += three(cr) + ' Crore ';
+  if (lk) out += two(lk) + ' Lakh ';
+  if (th) out += two(th) + ' Thousand ';
+  if (num) out += three(num);
+  return 'Rupees ' + out.trim() + ' Only';
+}
+
+/* ---------------- Navigation ---------------- */
+document.querySelectorAll('#nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#nav button').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+  b.classList.add('active'); $('v-' + b.dataset.v).classList.add('active');
+  load(true);
+});
+
+/* ---------------- New request form ---------------- */
+function drawPeople() {
+  $('people').innerHTML = CFG.requesters.map(n =>
+    `<div class="person" data-n="${esc(n)}"><div class="av" style="background:${COLORS[n] || '#475569'}">${esc(n[0])}</div><b>${esc(n)}</b></div>`).join('');
+  document.querySelectorAll('.person').forEach(p => p.onclick = () => {
+    document.querySelectorAll('.person').forEach(x => x.classList.remove('sel'));
+    p.classList.add('sel'); selName = p.dataset.n; summary();
+  });
+}
+function drawFroms() {
+  $('froms').innerHTML = (CFG.payFrom || []).map(n => `<div class="from" data-n="${esc(n)}">${esc(n)}</div>`).join('');
+  document.querySelectorAll('.from').forEach(p => p.onclick = () => {
+    document.querySelectorAll('.from').forEach(x => x.classList.remove('sel'));
+    p.classList.add('sel'); selFrom = p.dataset.n; summary();
+  });
+}
+function summary() {
+  const amt = Number($('amount').value) || 0;
+  $('sAmt').textContent = inr(amt);
+  $('sWords').textContent = words(amt) || '—';
+  $('amtHint').textContent = amt ? words(amt) : '';
+  $('sBy').textContent = selName || '—';
+  $('sVendor').textContent = $('vendor').value.trim() || '—';
+  $('sFrom').textContent = selFrom || '—';
+  $('sTo').textContent = approverOf(selName) + ' for approval';
+  $('sFile').textContent = (typeof FILES !== 'undefined' && FILES.length) ? '📎 ' + (FILES.length === 1 ? FILES[0].name : FILES.length + ' files') : '—';
+  const d = $('due').value; const n = daysTo(d);
+  $('sDue').textContent = d ? nice(d) + (n === 0 ? ' (today)' : n > 0 ? ` (in ${n} day${n > 1 ? 's' : ''})` : '') : '—';
+}
+['vendor','amount','due','notes'].forEach(k => $(k).addEventListener('input', () => { $(k).classList.remove('err'); summary(); }));
+document.querySelectorAll('.chip[data-d]').forEach(c => c.onclick = () => {
+  const d = new Date();
+  if (c.dataset.d === 'eom') { d.setMonth(d.getMonth() + 1, 0); } else { d.setDate(d.getDate() + Number(c.dataset.d)); }
+  $('due').value = iso(d); summary();
+});
+
+/* ---------------- Attachment ---------------- */
+let FILES = [];                        // [{ name, type, data(base64), size, preview }]
+const MAX_MB = 10, MAX_FILES = 5, MAX_TOTAL_MB = 20;
+const kb = n => n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB';
+function readAsDataURL(f) { return new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsDataURL(f); }); }
+async function shrinkImage(f) {        // resize big photos so uploads are quick
+  const url = await readAsDataURL(f);
+  const img = await new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+  const max = 1800, sc = Math.min(1, max / Math.max(img.width, img.height));
+  if (sc === 1 && f.size < 1.5 * 1048576) return { url, type: f.type };
+  const c = document.createElement('canvas'); c.width = Math.round(img.width * sc); c.height = Math.round(img.height * sc);
+  const ctx = c.getContext('2d'); ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height); ctx.drawImage(img, 0, 0, c.width, c.height);
+  return { url: c.toDataURL('image/jpeg', 0.85), type: 'image/jpeg' };
+}
+async function pickFiles(list) {
+  for (const f of [...(list || [])]) {
+    if (FILES.length >= MAX_FILES) { toast('Up to ' + MAX_FILES + ' files per request', false); break; }
+    await pickFile(f);
+  }
+  drawFile();
+}
+async function pickFile(f) {
+  if (!f) return;
+  const isImg = /^image\//.test(f.type), isPdf = f.type === 'application/pdf';
+  if (!isImg && !isPdf) return toast((f.name || 'File') + ': please attach photos or PDFs only', false);
+  try {
+    let url = '', type = f.type, name = f.name || 'attachment';
+    if (isImg) { const r = await shrinkImage(f); url = r.url; type = r.type; if (type === 'image/jpeg') name = name.replace(/\.[^.]+$/, '') + '.jpg'; }
+    else url = await readAsDataURL(f);
+    const data = url.split(',')[1], size = Math.round(data.length * 3 / 4);
+    if (size > MAX_MB * 1048576) return toast(name + ' is larger than ' + MAX_MB + ' MB', false);
+    if (FILES.reduce((t, x) => t + x.size, 0) + size > MAX_TOTAL_MB * 1048576) return toast('All files together must be under ' + MAX_TOTAL_MB + ' MB', false);
+    FILES.push({ name, type, data, size, preview: isImg ? url : '' });
+  } catch (e) { toast('Could not read ' + (f.name || 'this file'), false); }
+}
+function drawFile() {
+  $('drop').style.display = FILES.length >= MAX_FILES ? 'none' : 'flex';
+  $('dropTitle').textContent = FILES.length ? 'Add more files (' + FILES.length + ' of ' + MAX_FILES + ')' : 'Attach invoices, bills or screenshots';
+  $('fileList').innerHTML = FILES.map((f, i) => `<div class="filechip">
+      ${f.preview ? `<img src="${f.preview}" alt="">` : '<div class="pdf">PDF</div>'}
+      <div class="nm"><b>${esc(f.name)}</b><span>${kb(f.size)}</span></div>
+      <button type="button" onclick="FILES.splice(${i},1);drawFile()">Remove</button></div>`).join('');
+  $('fileIn').value = '';
+  summary();
+}
+$('fileIn').onchange = e => pickFiles(e.target.files);
+['dragenter','dragover'].forEach(ev => $('drop').addEventListener(ev, e => { e.preventDefault(); $('drop').classList.add('over'); }));
+['dragleave','drop'].forEach(ev => $('drop').addEventListener(ev, e => { e.preventDefault(); $('drop').classList.remove('over'); }));
+$('drop').addEventListener('drop', e => pickFiles(e.dataTransfer.files));
+document.addEventListener('paste', e => {              // paste a screenshot with Ctrl+V on the New Request tab
+  if (!$('v-new').classList.contains('active')) return;
+  const it = [...(e.clipboardData || {}).items || []].find(i => i.kind === 'file');
+  if (it) { pickFiles([it.getAsFile()]); toast('Screenshot attached'); }
+});
+
+$('submitBtn').onclick = async () => {
+  const data = { name: selName, payFrom: selFrom, vendor: $('vendor').value.trim(), amount: $('amount').value, due: $('due').value, notes: $('notes').value.trim() };
+  if (!data.name) return toast('Select who is raising the request', false);
+  if (!data.vendor) { $('vendor').classList.add('err'); $('vendor').focus(); return toast('Enter the vendor name', false); }
+  if (!data.payFrom) return toast('Select which company the payment is from', false);
+  if (!(Number(data.amount) > 0)) { $('amount').classList.add('err'); $('amount').focus(); return toast('Enter a valid amount', false); }
+  if (!data.due) { $('due').classList.add('err'); return toast('Pick the payment due date', false); }
+
+  const pin = await askPin(data.name, `Submitting ${inr(data.amount)} for ${data.vendor}. Enter ${data.name}'s PIN to confirm.`, false);
+  if (!pin) return;
+  data.pin = pin;
+  if (FILES.length) data.files = FILES.map(f => ({ name: f.name, type: f.type, data: f.data }));
+
+  const b = $('submitBtn'); const html = b.innerHTML; b.disabled = true; b.innerHTML = '<span class="spin"></span> ' + (FILES.length ? 'Uploading ' + FILES.length + ' file' + (FILES.length > 1 ? 's' : '') + ' & submitting…' : 'Submitting…');
+  try {
+    const res = LIVE ? await call('submitRequest', data) : demoSubmit(data);
+    const id = (res && typeof res === 'object') ? res.id : res;
+    toast(`${id} sent to ${approverOf(data.name)} for approval`);
+    if (res && res.warn) setTimeout(() => toast(res.warn, false), 400);
+    ['vendor','amount','due','notes'].forEach(k => $(k).value = '');
+    selFrom = ''; document.querySelectorAll('.from').forEach(x => x.classList.remove('sel'));
+    FILES = []; drawFile();
+    summary(); load();
+  } catch (e) { toast(e.message || String(e), false); }
+  b.disabled = false; b.innerHTML = html;
+};
+
+/* ---------------- PIN modal ---------------- */
+let pinResolve = null;
+function askPin(name, text, allowRemember = false) {   // PIN is asked for every action, never remembered
+  $('pinTitle').textContent = `${name}'s PIN`;
+  $('pinText').textContent = text;
+  $('pinInput').value = '';
+  $('pinRemember').parentElement.style.display = allowRemember ? 'flex' : 'none';
+  $('pinScrim').classList.add('open');
+  setTimeout(() => $('pinInput').focus(), 50);
+  return new Promise(r => pinResolve = v => {
+    $('pinScrim').classList.remove('open');
+    if (v && allowRemember && $('pinRemember').checked) { PINS[name] = v; lockState(); }
+    r(v);
+  });
+}
+$('pinOk').onclick = () => { const v = $('pinInput').value.trim(); if (!v) return $('pinInput').focus(); pinResolve(v); };
+$('pinCancel').onclick = () => pinResolve(null);
+$('pinInput').onkeydown = e => { if (e.key === 'Enter') $('pinOk').click(); if (e.key === 'Escape') pinResolve(null); };
+function lockState() {
+  [['lock-Arun', selApprover], ['lock-pay', selPayer]].forEach(([id, n]) => {
+    const el = $(id); if (!el) return;
+    el.className = 'lock off';
+    el.textContent = '🔒 Locked · PIN needed';
+  });
+}
+function drawApprovers() {
+  const list = approverList();
+  if (list.indexOf(selApprover) === -1) selApprover = list[0];
+  const pend = DATA.filter(r => r.status === 'Pending Approval');
+  $('approvers').innerHTML = list.map(n => {
+    const c = pend.filter(r => (r.approver || approverOf(r.by)) === n).length;
+    const whose = n === CFG.approver ? '' : ' <small>(' + Object.keys(CFG.altApprovers).filter(k => CFG.altApprovers[k] === n).join(', ') + "'s requests)</small>";
+    return `<div class="payer ${n === selApprover ? 'sel' : ''}" data-n="${esc(n)}"><span class="av" style="background:${COLORS[n] || '#475569'}">${esc(n[0])}</span>${esc(n)}${whose}<span class="pill ${c ? 'hot' : ''}" style="margin-left:4px">${c}</span></div>`;
+  }).join('');
+  document.querySelectorAll('#approvers .payer').forEach(p => p.onclick = () => { selApprover = p.dataset.n; render(); });
+  $('apTitle').textContent = selApprover + ' · Approver';
+  $('apAv').textContent = selApprover[0]; $('apAv').style.background = COLORS[selApprover] || '#475569';
+  $('apText').textContent = selApprover === CFG.approver
+    ? 'Approve or reject payment requests. You\'ll be asked for your PIN.'
+    : 'Approve or reject requests raised by ' + Object.keys(CFG.altApprovers).filter(k => CFG.altApprovers[k] === selApprover).join(', ') + '. You\'ll be asked for your PIN.';
+}
+function drawPayers() {
+  const list = CFG.payers || [CFG.payer];
+  if (list.indexOf(selPayer) === -1) selPayer = list[0];
+  $('payers').innerHTML = list.map((n, i) => `<div class="payer ${n === selPayer ? 'sel' : ''}" data-n="${esc(n)}">
+      <span class="av" style="background:${COLORS[n] || '#475569'}">${esc(n[0])}</span>${esc(n)}${i ? ' <small>(backup)</small>' : ''}</div>`).join('');
+  document.querySelectorAll('.payer').forEach(p => p.onclick = () => { selPayer = p.dataset.n; drawPayers(); });
+  $('payTitle').textContent = selPayer + ' · Payments';
+  $('payAv').textContent = selPayer[0]; $('payAv').style.background = COLORS[selPayer] || '#475569';
+  lockState();
+}
+function wrongPin(name, e) { delete PINS[name]; lockState(); toast(e.message || String(e), false); }
+
+/* ---------------- Actions ---------------- */
+async function decide(id, decision, btn) {
+  const r = DATA.find(x => x.id === id); if (!r) return;
+  if (decision === 'reject' && !confirm(`Reject ${id} (${r.vendor}, ${inr(r.amount)})?`)) return;
+  const who = r.approver || approverOf(r.by);
+  const pin = await askPin(who, `${who}: confirm ${decision === 'approve' ? 'approval' : 'rejection'} of ${inr(r.amount)} to ${r.vendor} (requested by ${r.by}).`, false);
+  if (!pin) return;
+  const remark = ($('rm-' + id) || {}).value || '';
+  btn.disabled = true;
+  try {
+    const s = LIVE ? await call('decideRequest', id, pin, decision, remark) : demoDecide(id, decision, remark, pin, who);
+    toast(`${id} ${s.toLowerCase()}`); load();
+  } catch (e) { wrongPin(who, e); btn.disabled = false; }
+}
+async function pay(id, btn) {
+  const r = DATA.find(x => x.id === id); if (!r) return;
+  const who = selPayer;
+  const pin = await askPin(who, `${who}: confirm payment of ${inr(r.amount)} to ${r.vendor} is done.`, false);
+  if (!pin) return;
+  const ref = ($('ref-' + id) || {}).value || '';
+  btn.disabled = true;
+  try {
+    LIVE ? await call('markPaid', id, pin, ref, who) : demoPay(id, ref, pin, who);
+    toast(`${id} marked as paid by ${who}`); load();
+  } catch (e) { wrongPin(who, e); btn.disabled = false; }
+}
+
+/* ---------------- Rendering ---------------- */
+const BCLS = { 'Pending Approval':'b-pending', 'Approved':'b-approved', 'Paid':'b-paid', 'Rejected':'b-rejected' };
+function dueTag(r) {
+  if (r.status === 'Paid' || r.status === 'Rejected') return `<span class="tag">📅 ${nice(r.due)}</span>`;
+  const n = daysTo(r.due);
+  if (n < 0) return `<span class="tag due-over">⚠ Overdue by ${-n} day${-n > 1 ? 's' : ''}</span>`;
+  if (n === 0) return `<span class="tag due-soon">⏰ Due today</span>`;
+  if (n <= 3) return `<span class="tag due-soon">⏰ Due in ${n} day${n > 1 ? 's' : ''}</span>`;
+  return `<span class="tag">📅 Due ${nice(r.due)}</span>`;
+}
+function tracker(r) {
+  const rej = r.status === 'Rejected';
+  const s2 = rej ? 'rej' : (r.status === 'Approved' || r.status === 'Paid') ? 'done' : 'now';
+  const s3 = r.status === 'Paid' ? 'done' : r.status === 'Approved' ? 'now' : '';
+  const short = t => t ? t.split(',')[0] : '';
+  return `<div class="track">
+    <div class="tk done"><div class="c">✓</div>Requested<small>${esc(r.by)}</small></div>
+    <div class="tk ${s2}"><div class="c">${rej ? '✕' : s2 === 'done' ? '✓' : ''}</div>${rej ? 'Rejected' : 'Approval'}<small>${s2 === 'now' ? 'Waiting · ' + esc(r.approver || approverOf(r.by)) : esc(short(r.apprAt))}</small></div>
+    <div class="tk ${s3}"><div class="c">${s3 === 'done' ? '✓' : ''}</div>Paid<small>${s3 === 'done' ? esc(r.paidBy ? r.paidBy + ' · ' : '') + esc(short(r.paidAt)) : s3 === 'now' ? 'Waiting · Geyin / Arun' : ''}</small></div>
+  </div>`;
+}
+function card(r, act) {
+  const over = r.status !== 'Paid' && r.status !== 'Rejected' && daysTo(r.due) < 0;
+  return `<div class="rc ${over ? 'overdue' : ''}">
+    <div class="rc-h">
+      <div><div class="rc-id">${esc(r.id)}</div><div class="rc-v">${esc(r.vendor)}</div></div>
+      <div><div class="rc-a">${inr(r.amount)}</div><div style="text-align:right;margin-top:4px"><span class="badge ${BCLS[r.status] || ''}">${esc(r.status)}</span></div></div>
+    </div>
+    <div class="rc-meta">
+      <span class="tag"><span class="av" style="width:16px;height:16px;font-size:9px;background:${COLORS[r.by] || '#475569'}">${esc(String(r.by)[0] || '')}</span>${esc(r.by)}</span>
+      ${r.payFrom ? `<span class="tag co">🏢 ${esc(r.payFrom)}</span>` : ''}
+      ${attachLink(r)}
+      ${dueTag(r)}
+      <span class="tag">🕒 ${esc(r.created)}</span>
+    </div>
+    ${r.notes ? `<div class="rc-notes">${esc(r.notes)}</div>` : ''}
+    ${r.apprRemark ? `<div class="rc-notes" style="border-left-color:#7c3aed"><b>Arun:</b> ${esc(r.apprRemark)}</div>` : ''}
+    ${tracker(r)}
+    ${act || ''}
+  </div>`;
+}
+const atts = r => String(r.attach || '').split(/\s+/).filter(Boolean);
+function attachLink(r, label) {
+  const n = atts(r).length; if (!n) return '';
+  const text = n > 1 ? (label === 'Invoice' ? n + ' files' : 'View ' + n + ' files') : (label || 'View invoice');
+  return `<a class="tag att" href="#" onclick="event.preventDefault();event.stopPropagation();viewAttach('${esc(r.id)}',0)">📎 ${text}</a>`;
+}
+let pdfLib = null;
+function loadPdfJs() {
+  if (pdfLib) return Promise.resolve(pdfLib);
+  return new Promise((res, rej) => {
+    const sc = document.createElement('script');
+    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    sc.onload = () => { window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; pdfLib = window.pdfjsLib; res(pdfLib); };
+    sc.onerror = rej; document.head.appendChild(sc);
+  });
+}
+function b64ToBytes(b64) { const bin = atob(b64), u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
+async function viewAttach(id, idx) {
+  const r = DATA.find(x => x.id === id); if (!r) return;
+  const list = atts(r); idx = Number(idx) || 0; if (!list[idx]) return;
+  $('attTitle').textContent = r.vendor + ' · ' + inr(r.amount);
+  $('attSub').innerHTML = esc(r.id + ' · requested by ' + r.by) + (list.length > 1
+    ? '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:10px">' + list.map((u, i) =>
+        `<button class="chip" style="${i === idx ? 'background:var(--brand);color:#fff;border-color:var(--brand)' : ''}" onclick="viewAttach('${esc(r.id)}',${i})">File ${i + 1}</button>`).join('') + '</div>'
+    : '');
+  $('attBody').innerHTML = '<div class="skel" style="height:260px"></div>';
+  $('attActions').innerHTML = '';
+  $('attScrim').classList.add('open');
+  try {
+    let f;
+    const cur = list[idx];
+    if (cur.startsWith('data:')) {                              // preview mode
+      const m = cur.match(/^data:([^;]+);base64,(.*)$/); f = { type: m[1], data: m[2], name: r.id + '-' + (idx + 1), url: '' };
+    } else f = await call('getAttachment', id, idx);
+    const bytes = b64ToBytes(f.data), blobUrl = URL.createObjectURL(new Blob([bytes], { type: f.type }));
+    $('attActions').innerHTML = `<a class="btn btn-ghost" href="${blobUrl}" download="${esc(f.name || id)}">⬇ Download</a>` +
+      (f.url ? `<a class="btn btn-ghost" href="${esc(f.url)}" target="_blank" rel="noopener">Open in Google Drive</a>` : '');
+    if (/^image\//.test(f.type)) {
+      $('attBody').innerHTML = `<img src="data:${f.type};base64,${f.data}" alt="" style="max-width:100%;border-radius:8px;border:1px solid var(--line)">`;
+    } else if (f.type === 'application/pdf') {
+      try {
+        const lib = await loadPdfJs(), doc = await lib.getDocument({ data: bytes }).promise;
+        $('attBody').innerHTML = '';
+        for (let p = 1; p <= Math.min(doc.numPages, 10); p++) {
+          const page = await doc.getPage(p), vp = page.getViewport({ scale: 1.6 });
+          const c = document.createElement('canvas'); c.width = vp.width; c.height = vp.height;
+          c.style.cssText = 'width:100%;border:1px solid var(--line);border-radius:8px;margin-bottom:10px';
+          $('attBody').appendChild(c);
+          await page.render({ canvasContext: c.getContext('2d'), viewport: vp }).promise;
+        }
+        if (doc.numPages > 10) $('attBody').insertAdjacentHTML('beforeend', '<p class="s">Showing first 10 pages — download for the rest.</p>');
+      } catch (e) {
+        $('attBody').innerHTML = '<div class="empty"><div class="ico">📄</div><b>PDF ready</b>Use Download to open it.</div>';
+      }
+    } else {
+      $('attBody').innerHTML = '<div class="empty"><div class="ico">📄</div><b>File ready</b>Use Download to open it.</div>';
+    }
+  } catch (e) {
+    $('attBody').innerHTML = `<div class="empty"><div class="ico">⚠️</div><b>Could not load the attachment</b>${esc(e.message || e)}</div>`;
+    if (list[idx] && !list[idx].startsWith('data:')) $('attActions').innerHTML = `<a class="btn btn-ghost" href="${esc(list[idx])}" target="_blank" rel="noopener">Open in Google Drive</a>`;
+  }
+}
+function emptyBox(icon, title, text) { return `<div class="empty" style="grid-column:1/-1"><div class="ico">${icon}</div><b>${title}</b>${text}</div>`; }
+function sorted(list, how) {
+  const a = list.slice();
+  if (how === 'amt') a.sort((x, y) => y.amount - x.amount);
+  else if (how === 'new') a.sort((x, y) => String(y.id).localeCompare(String(x.id)));
+  else a.sort((x, y) => String(x.due).localeCompare(String(y.due)));
+  return a;
+}
+
+function render() {
+  const pend = DATA.filter(r => r.status === 'Pending Approval');
+  const appr = DATA.filter(r => r.status === 'Approved');
+  const paid = DATA.filter(r => r.status === 'Paid');
+  const overdue = DATA.filter(r => (r.status === 'Pending Approval' || r.status === 'Approved') && daysTo(r.due) < 0);
+  const sum = a => a.reduce((t, r) => t + r.amount, 0);
+  const ym = today().slice(0, 7);
+  const paidMonth = paid.filter(r => String(r.paidAt).length && monthOf(r.paidAt) === ym);
+
+  $('kpis').innerHTML = `
+    <div class="kpi" style="--c:#d97706"><div class="lbl">Awaiting approval</div><div class="num">${pend.length}</div><div class="sub">${inr(sum(pend))}</div></div>
+    <div class="kpi" style="--c:#2563eb"><div class="lbl">Approved · to pay</div><div class="num">${appr.length}</div><div class="sub">${inr(sum(appr))}</div></div>
+    <div class="kpi" style="--c:#059669"><div class="lbl">Paid this month</div><div class="num">${paidMonth.length}</div><div class="sub">${inr(sum(paidMonth))}</div></div>
+    <div class="kpi" style="--c:#dc2626"><div class="lbl">Overdue</div><div class="num">${overdue.length}</div><div class="sub">${inr(sum(overdue))}</div></div>`;
+
+  const na = $('n-approve'), np = $('n-pay');
+  na.textContent = pend.length; na.className = 'pill' + (pend.length ? ' hot' : '');
+  np.textContent = appr.length; np.className = 'pill' + (appr.length ? ' hot' : '');
+
+  drawApprovers();
+  const mine = pend.filter(r => (r.approver || approverOf(r.by)) === selApprover);
+  $('approveList').innerHTML = mine.length ? sorted(mine, $('aSort').value).map(r => card(r, `
+    <div class="rc-act">
+      <input class="ctl" id="rm-${esc(r.id)}" placeholder="Remark (optional)">
+      <button class="btn btn-reject" onclick="decide('${esc(r.id)}','reject',this)">✕ Reject</button>
+      <button class="btn btn-approve" onclick="decide('${esc(r.id)}','approve',this)">✓ Approve</button>
+    </div>`)).join('') : emptyBox('✅', 'All caught up', 'No requests are waiting for ' + selApprover + "'s approval.");
+
+  $('payList').innerHTML = appr.length ? sorted(appr, $('pSort').value).map(r => card(r, `
+    <div class="rc-act">
+      <input class="ctl" id="ref-${esc(r.id)}" placeholder="UTR / Cheque / Txn reference">
+      <button class="btn btn-approve" onclick="pay('${esc(r.id)}',this)">✓ Mark as Paid</button>
+    </div>`)).join('') : emptyBox('💸', 'Nothing to pay', 'No approved payments are pending.');
+
+  renderTable();
+  const vendors = [...new Set(DATA.map(r => r.vendor).filter(Boolean))].sort();
+  $('vendorList').innerHTML = vendors.map(v => `<option value="${esc(v)}">`).join('');
+}
+function monthOf(t) {   // "14 Oct 2026, 04:51 PM" -> "2026-10"
+  const m = String(t).match(/(\d{1,2}) (\w{3}) (\d{4})/); if (!m) return '';
+  const mi = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'].indexOf(m[2]) + 1;
+  return m[3] + '-' + String(mi).padStart(2, '0');
+}
+
+function filtered() {
+  const q = $('fSearch').value.toLowerCase(), fs = $('fStatus').value, fb = $('fBy').value, fr = $('fRange').value, ff = $('fFrom').value;
+  let list = DATA.filter(r => (!fs || r.status === fs) && (!fb || r.by === fb) && (!ff || r.payFrom === ff) &&
+    (!q || [r.vendor, r.id, r.notes, r.payRef].join(' ').toLowerCase().includes(q)));
+  if (fr) list = list.filter(r => {
+    const n = daysTo(r.due), open = r.status === 'Pending Approval' || r.status === 'Approved';
+    if (fr === 'over') return open && n < 0;
+    if (fr === 'week') return n >= 0 && n <= 7;
+    if (fr === 'month') return String(r.due).slice(0, 7) === today().slice(0, 7);
+  });
+  return list.sort((a, b) => {
+    const x = a[sortK], y = b[sortK];
+    return (typeof x === 'number' ? x - y : String(x).localeCompare(String(y))) * sortDir;
+  });
+}
+function renderTable() {
+  const list = filtered();
+  $('allBody').innerHTML = list.length ? list.map(r => `
+    <tr onclick="detail('${esc(r.id)}')">
+      <td><b>${esc(r.id)}</b><div class="s">${esc(r.created)}</div></td>
+      <td>${esc(r.vendor)} ${attachLink(r, 'Invoice')}${r.notes ? `<div class="s">${esc(r.notes).slice(0, 60)}</div>` : ''}</td>
+      <td>${esc(r.by)}</td>
+      <td>${esc(r.payFrom) || '<span class="s">—</span>'}</td>
+      <td class="num"><b>${inr(r.amount)}</b></td>
+      <td>${nice(r.due)}${(r.status === 'Pending Approval' || r.status === 'Approved') && daysTo(r.due) < 0 ? '<div class="s" style="color:var(--red);font-weight:600">Overdue</div>' : ''}</td>
+      <td><span class="badge ${BCLS[r.status] || ''}">${esc(r.status)}</span></td>
+      <td>${esc(r.payRef) || '<span class="s">—</span>'}</td>
+    </tr>`).join('') : `<tr><td colspan="8" style="text-align:center;padding:40px;color:var(--muted)">No requests match these filters</td></tr>`;
+  $('allFoot').innerHTML = list.length ? `<tr><td colspan="4">${list.length} request${list.length > 1 ? 's' : ''}</td><td class="num">${inr(list.reduce((t, r) => t + r.amount, 0))}</td><td colspan="3"></td></tr>` : '';
+}
+document.querySelectorAll('th[data-k]').forEach(th => th.onclick = () => {
+  const k = th.dataset.k; sortDir = sortK === k ? -sortDir : 1; sortK = k; renderTable();
+});
+['fSearch','fStatus','fBy','fRange','fFrom'].forEach(k => $(k).addEventListener('input', renderTable));
+['aSort','pSort'].forEach(k => $(k).onchange = render);
+
+function detail(id) {
+  const r = DATA.find(x => x.id === id); if (!r) return;
+  $('detTitle').innerHTML = `${esc(r.vendor)} <span class="badge ${BCLS[r.status]}" style="vertical-align:middle;margin-left:6px">${esc(r.status)}</span>`;
+  $('detSub').textContent = r.id;
+  const line = (k, v) => v ? `<div class="sumline"><span>${k}</span><b>${esc(v)}</b></div>` : '';
+  $('detBody').innerHTML = `<div class="bigamt">${inr(r.amount)}</div><div class="words">${words(r.amount)}</div>` +
+    line('Requested by', r.by) + line('Payment from', r.payFrom) + line('Raised on', r.created) + line('Due date', nice(r.due)) + line('Notes', r.notes) +
+    (r.attach ? `<div class="sumline"><span>Invoice</span><b>${attachLink(r, 'Open attachment')}</b></div>` : '') +
+    line(r.status === 'Rejected' ? 'Rejected by' : 'Approved by', r.apprBy) + line('Decision time', r.apprAt) + line('Remark', r.apprRemark) +
+    line('Paid by', r.paidBy) + line('Paid on', r.paidAt) + line('Payment ref.', r.payRef);
+  $('detScrim').classList.add('open');
+}
+$('detClose').onclick = () => $('detScrim').classList.remove('open');
+$('attClose').onclick = () => $('attScrim').classList.remove('open');
+$('attScrim').addEventListener('click', e => { if (e.target === $('attScrim')) $('attScrim').classList.remove('open'); });
+[$('detScrim'), $('pinScrim')].forEach(s => s.addEventListener('click', e => { if (e.target === s) { s.id === 'pinScrim' ? pinResolve(null) : s.classList.remove('open'); } }));
+
+$('exportBtn').onclick = () => {
+  const rows = [['Request ID','Requested By','Payment From','Vendor','Amount','Due Date','Status','Notes','Approved/Rejected By','Approval Time','Remark','Paid By','Paid Time','Payment Ref','Attachment']]
+    .concat(filtered().map(r => [r.id, r.by, r.payFrom, r.vendor, r.amount, r.due, r.status, r.notes, r.apprBy, r.apprAt, r.apprRemark, r.paidBy, r.paidAt, r.payRef, r.attach]));
+  const csv = rows.map(row => row.map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(',')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv' }));
+  a.download = 'Payment_Requests_' + today() + '.csv'; a.click();
+  toast('Exported ' + (rows.length - 1) + ' rows — opens in Excel');
+};
+
+/* ---------------- Data loading ---------------- */
+let first = true;
+async function load(quiet) {
+  if (first) { ['approveList','payList'].forEach(k => $(k).innerHTML = '<div class="skel"></div><div class="skel"></div>'); }
+  try {
+    if (LIVE) DATA = await call('getRequests');
+    render(); first = false;
+    $('synced').textContent = (LIVE ? 'Live ' + (CFG.version || '(old version)') + ' · updated ' : 'Preview · ') + new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+  } catch (e) {
+    const m = e.message || String(e);
+    if (/PIN/i.test(m)) { forgetSession(); showLogin(m); return; }
+    if (!quiet) toast(m || 'Could not load data', false); else showError('Could not refresh: ' + m);
+  }
+}
+
+/* ---------------- Preview demo data ---------------- */
+function stamp(dayOffset) { const d = new Date(); d.setDate(d.getDate() + dayOffset); return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) + ', 10:30 AM'; }
+function dIso(o) { const d = new Date(); d.setDate(d.getDate() + o); return iso(d); }
+function seedDemo() {
+  DATA = [
+    { id:'PR-DEMO-005', payFrom:'Jain Wire EKM', by:'Rajesh', vendor:'Kerala Steel Traders', amount:245000, due:dIso(2), notes:'Invoice KST/1182 — MS wire rods', status:'Pending Approval', created:stamp(0) },
+    { id:'PR-DEMO-004', payFrom:'Jain Wire CLT', by:'Mudit', vendor:'Sri Balaji Transport', amount:38500, due:dIso(-1), notes:'Freight for Oct dispatches', status:'Pending Approval', created:stamp(-2) },
+    { id:'PR-DEMO-003', payFrom:'Best Bond', by:'Sachin', vendor:'Precision Dies & Tools', amount:72000, due:dIso(5), notes:'PO 4471 — drawing dies', status:'Approved', created:stamp(-3), apprBy:'Arun', apprAt:stamp(-1), apprRemark:'OK, pay before due date' },
+    { id:'PR-DEMO-002', payFrom:'Jain Wire Kannur', by:'Mudit', vendor:'KSEB Power Bill', amount:186420, due:dIso(-4), status:'Paid', created:stamp(-8), apprBy:'Arun', apprAt:stamp(-7), paidBy:'Geyin', paidAt:stamp(-5), payRef:'UTR 402918774512' },
+    { id:'PR-DEMO-001', payFrom:'Jain Wire EKM', by:'Jobiya', vendor:'Packwell Industries', amount:15800, due:dIso(-6), notes:'Packing material', status:'Rejected', created:stamp(-9), apprBy:'Arun', apprAt:stamp(-8), apprRemark:'Already paid via petty cash' }
+  ];
+}
+function demoSubmit(d) {
+  const okp = { Sachin:'1111', Mudit:'2222', Rajesh:'3333', Jobiya:'6666', Arun:'4444' };
+  if (okp[d.name] !== d.pin) throw new Error('Wrong PIN (preview PINs: Sachin 1111, Mudit 2222, Rajesh 3333, Jobiya 6666, Arun 4444)');
+  const id = 'PR-DEMO-' + String(DATA.length + 1).padStart(3, '0');
+  DATA.unshift({ id, by:d.name, payFrom:d.payFrom, vendor:d.vendor, amount:Number(d.amount), due:d.due, notes:d.notes, status:'Pending Approval', created:stamp(0),
+    attach: (d.files || []).map(f => 'data:' + f.type + ';base64,' + f.data).join('\n') });
+  return id;
+}
+function demoDecide(id, dec, remark, pin, who) {
+  const ok = { Arun:'4444', Sachin:'1111' };
+  if (pin !== ok[who]) throw new Error('Wrong PIN for ' + who + ' (preview PINs: Arun 4444, Sachin 1111)');
+  const r = DATA.find(x => x.id === id); r.status = dec === 'approve' ? 'Approved' : 'Rejected';
+  r.apprBy = who; r.apprAt = stamp(0); r.apprRemark = remark; return r.status;
+}
+function demoPay(id, ref, pin, who) {
+  const ok = { Geyin:'5555', Arun:'4444' };
+  if (pin !== ok[who]) throw new Error('Wrong PIN for ' + who + ' (preview PINs: Geyin 5555, Arun 4444)');
+  const r = DATA.find(x => x.id === id); r.status = 'Paid'; r.paidBy = who; r.paidAt = stamp(0); r.payRef = ref;
+}
+
+/* ---------------- Start ---------------- */
+function applyConfig() {
+  drawPeople(); drawFroms();
+  $('whoCan').textContent = 'Only ' + CFG.requesters.join(', ').replace(/, ([^,]*)$/, ' and $1') + ' can raise requests.';
+  $('fFrom').innerHTML = '<option value="">All companies</option>' + (CFG.payFrom || []).map(n => `<option>${esc(n)}</option>`).join('');
+  $('fBy').innerHTML = '<option value="">All requesters</option>' + CFG.requesters.map(n => `<option>${esc(n)}</option>`).join('');
+  summary(); drawPayers();
+}
+function stamped() {
+  $('synced').textContent = (LIVE ? 'Live ' + (CFG.version || '') + ' · updated ' : 'Preview · ') + new Date().toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
+}
+/* ---------------- Sign-in ---------------- */
+let loginSel = '';
+function saveSession(remember) {
+  try { const s = JSON.stringify(SESSION); sessionStorage.setItem('pa_session', s);
+        if (remember) localStorage.setItem('pa_session', s); else localStorage.removeItem('pa_session'); } catch (e) {}
+}
+function loadSession() {
+  try { return JSON.parse(sessionStorage.getItem('pa_session') || localStorage.getItem('pa_session') || 'null'); } catch (e) { return null; }
+}
+function forgetSession() {
+  SESSION = null;
+  try { sessionStorage.removeItem('pa_session'); localStorage.removeItem('pa_session'); } catch (e) {}
+}
+function signOut() { forgetSession(); location.reload(); }
+function drawLogin() {
+  const users = CFG.users || ['Sachin', 'Mudit', 'Rajesh', 'Jobiya', 'Arun', 'Geyin'];
+  $('loginPeople').innerHTML = users.map(n => `<div class="person ${n === loginSel ? 'sel' : ''}" data-n="${esc(n)}">
+      <div class="av" style="background:${COLORS[n] || '#475569'}">${esc(n[0])}</div><b>${esc(n)}</b></div>`).join('');
+  document.querySelectorAll('#loginPeople .person').forEach(p => p.onclick = () => { loginSel = p.dataset.n; drawLogin(); $('loginPin').focus(); });
+}
+function showLogin(msg) {
+  drawLogin(); $('loginErr').textContent = msg || ''; $('loginPin').value = '';
+  $('loginScrim').classList.add('open'); $('synced').textContent = 'Signed out';
+}
+async function doLogin() {
+  if (!loginSel) { $('loginErr').textContent = 'Choose your name first'; return; }
+  const pin = $('loginPin').value.trim();
+  if (!pin) { $('loginErr').textContent = 'Enter your PIN'; $('loginPin').focus(); return; }
+  const b = $('loginBtn'); b.disabled = true; b.textContent = 'Signing in…'; $('loginErr').textContent = '';
+  SESSION = { name: loginSel, pin };
+  try {
+    const boot = await callT('login', 30000);
+    saveSession($('loginRemember').checked);
+    $('loginScrim').classList.remove('open');
+    afterLogin(boot);
+  } catch (e) { SESSION = null; $('loginErr').textContent = e.message || String(e); }
+  b.disabled = false; b.textContent = 'Sign in';
+}
+$('loginBtn').onclick = doLogin;
+$('loginPin').onkeydown = e => { if (e.key === 'Enter') doLogin(); };
+function afterLogin(boot) {
+  CFG = Object.assign({}, CFG, boot.cfg || {}); DATA = boot.data || [];
+  const me = SESSION.name;
+  if (approverList().indexOf(me) !== -1) selApprover = me;          // open the right queues for this person
+  if ((CFG.payers || []).indexOf(me) !== -1 && me !== CFG.approver) selPayer = me;
+  applyConfig(); render(); stamped();
+  const p = document.querySelector('#people .person[data-n="' + me + '"]'); if (p) p.click();
+  $('whoami').innerHTML = ' · ' + esc(me) + ' · <a href="#" onclick="signOut();return false" style="color:#fff;font-weight:700">Sign out</a>';
+  if (!refreshTimer) refreshTimer = setInterval(() => load(true), 45000);
+}
+
+(async function init() {
+  window.__appStarted = true;
+  $('due').min = today();
+  if (!LIVE) {                                   // preview with sample data
+    $('previewBanner').style.display = 'block'; seedDemo();
+    applyConfig(); render(); first = false; stamped(); return;
+  }
+  applyConfig(); render(); first = false;
+  $('synced').textContent = 'Connecting…';
+  try { CFG = Object.assign({}, CFG, await callT('getConfig', 25000)); } catch (e) { showError('Could not reach the server: ' + (e.message || e)); }
+  const saved = loadSession();
+  if (saved && saved.name && saved.pin) {
+    SESSION = saved;
+    try { afterLogin(await callT('login', 30000)); return; }
+    catch (e) { forgetSession(); showLogin(e.message || String(e)); return; }
+  }
+  showLogin();
+})();
+</script>
+</body>
+</html>
