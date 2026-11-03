@@ -75,7 +75,7 @@
   .money{position:relative}.money span{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);font-weight:600}
   .money .ctl{padding-left:28px;font-weight:600}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-  .people{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:10px}
+  .people{display:grid;grid-template-columns:repeat(auto-fit,minmax(78px,1fr));gap:8px}
   @media (max-width:560px){.people{grid-template-columns:repeat(2,1fr)}}
   .person{border:1.5px solid var(--line);background:#fff;border-radius:12px;padding:12px 10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;transition:.15s}
   .person:hover{border-color:#b9c7dc;background:#fafcff}
@@ -88,6 +88,16 @@
   .from:hover{border-color:#b9c7dc}
   .from.sel{border-color:var(--accent);background:var(--accentbg);color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,235,.1)}
   .tag.co{background:#f1f5ff;color:#1e3a8a}
+  /* company colours: "Jain ..." = red, "Best Bond" = blue */
+  .co-jain{color:#b91c1c !important}
+  .co-bb{color:#1d4ed8 !important}
+  .tag.co.co-jain{background:#fdecec}
+  .tag.co.co-bb{background:#e6efff}
+  .from.co-jain{border-color:#f3c4c4}
+  .from.co-bb{border-color:#c4d6fb}
+  .from.sel.co-jain{background:#fdecec;border-color:#b91c1c;box-shadow:0 0 0 3px rgba(185,28,28,.12)}
+  .from.sel.co-bb{background:#e6efff;border-color:#1d4ed8;box-shadow:0 0 0 3px rgba(29,78,216,.12)}
+  .cotext{font-weight:700}
   .payers{display:flex;gap:8px;flex-wrap:wrap}
   .payer{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:#fff;border-radius:22px;padding:6px 14px 6px 6px;cursor:pointer;font-weight:600;font-size:13.5px;color:var(--ink2);transition:.15s}
   .payer .av{width:26px;height:26px;font-size:12px}
@@ -464,8 +474,10 @@ const GAS = typeof google !== 'undefined' && google.script && google.script.run;
 const API = !GAS && /^https:\/\/script\.google\.com\/.+\/exec$/.test(API_URL.trim());
 const LIVE = !!(GAS || API);
 let SESSION = null, refreshTimer = null;          // SESSION = { name, pin } of the signed-in person
-let CFG = { requesters:['Sachin','Mudit','Rajesh','Jobiya','Arun'], altApprovers:{ Arun:'Sachin' }, payFrom:['Jain Wire EKM','Jain Wire CLT','Jain Wire Kannur','Best Bond'], approver:'Arun', payer:'Geyin', payers:['Geyin','Arun'] };
+let CFG = { requesters:['Sachin','Mudit','Rajesh','Jobiya','Arun','Geyin'], altApprovers:{ Arun:'Sachin' }, payFrom:['Jain Wire EKM','Jain Wire CLT','Jain Wire Kannur','Best Bond'], approver:'Arun', payer:'Geyin', payers:['Geyin','Arun'] };
 let selPayer = 'Geyin', selApprover = 'Arun';
+const coClass = n => /best\s*bond/i.test(n || '') ? 'co-bb' : /jain/i.test(n || '') ? 'co-jain' : '';
+const coText = n => n ? `<span class="cotext ${coClass(n)}">${esc(n)}</span>` : '';
 const approverOf = by => (CFG.altApprovers || {})[by] || CFG.approver;
 const approverList = () => [...new Set([CFG.approver].concat(Object.values(CFG.altApprovers || {})))];
 let DATA = [], selName = '', selFrom = '', sortK = 'due', sortDir = 1;
@@ -538,7 +550,7 @@ function drawPeople() {
   });
 }
 function drawFroms() {
-  $('froms').innerHTML = (CFG.payFrom || []).map(n => `<div class="from" data-n="${esc(n)}">${esc(n)}</div>`).join('');
+  $('froms').innerHTML = (CFG.payFrom || []).map(n => `<div class="from ${coClass(n)}" data-n="${esc(n)}">${esc(n)}</div>`).join('');
   document.querySelectorAll('.from').forEach(p => p.onclick = () => {
     document.querySelectorAll('.from').forEach(x => x.classList.remove('sel'));
     p.classList.add('sel'); selFrom = p.dataset.n; summary();
@@ -551,7 +563,7 @@ function summary() {
   $('amtHint').textContent = amt ? words(amt) : '';
   $('sBy').textContent = selName || '—';
   $('sVendor').textContent = $('vendor').value.trim() || '—';
-  $('sFrom').textContent = selFrom || '—';
+  $('sFrom').innerHTML = selFrom ? coText(selFrom) : '—';
   $('sTo').textContent = approverOf(selName) + ' for approval';
   $('sFile').textContent = (typeof FILES !== 'undefined' && FILES.length) ? '📎 ' + (FILES.length === 1 ? FILES[0].name : FILES.length + ' files') : '—';
   const d = $('due').value; const n = daysTo(d);
@@ -756,7 +768,7 @@ function card(r, act) {
     </div>
     <div class="rc-meta">
       <span class="tag"><span class="av" style="width:16px;height:16px;font-size:9px;background:${COLORS[r.by] || '#475569'}">${esc(String(r.by)[0] || '')}</span>${esc(r.by)}</span>
-      ${r.payFrom ? `<span class="tag co">🏢 ${esc(r.payFrom)}</span>` : ''}
+      ${r.payFrom ? `<span class="tag co ${coClass(r.payFrom)}">🏢 ${esc(r.payFrom)}</span>` : ''}
       ${attachLink(r)}
       ${dueTag(r)}
       <span class="tag">🕒 ${esc(r.created)}</span>
@@ -904,7 +916,7 @@ function renderTable() {
       <td><b>${esc(r.id)}</b><div class="s">${esc(r.created)}</div></td>
       <td>${esc(r.vendor)} ${attachLink(r, 'Invoice')}${r.notes ? `<div class="s">${esc(r.notes).slice(0, 60)}</div>` : ''}</td>
       <td>${esc(r.by)}</td>
-      <td>${esc(r.payFrom) || '<span class="s">—</span>'}</td>
+      <td>${coText(r.payFrom) || '<span class="s">—</span>'}</td>
       <td class="num"><b>${inr(r.amount)}</b></td>
       <td>${nice(r.due)}${(r.status === 'Pending Approval' || r.status === 'Approved') && daysTo(r.due) < 0 ? '<div class="s" style="color:var(--red);font-weight:600">Overdue</div>' : ''}</td>
       <td><span class="badge ${BCLS[r.status] || ''}">${esc(r.status)}</span></td>
@@ -924,7 +936,7 @@ function detail(id) {
   $('detSub').textContent = r.id;
   const line = (k, v) => v ? `<div class="sumline"><span>${k}</span><b>${esc(v)}</b></div>` : '';
   $('detBody').innerHTML = `<div class="bigamt">${inr(r.amount)}</div><div class="words">${words(r.amount)}</div>` +
-    line('Requested by', r.by) + line('Payment from', r.payFrom) + line('Raised on', r.created) + line('Due date', nice(r.due)) + line('Notes', r.notes) +
+    line('Requested by', r.by) + (r.payFrom ? `<div class="sumline"><span>Payment from</span><b>${coText(r.payFrom)}</b></div>` : '') + line('Raised on', r.created) + line('Due date', nice(r.due)) + line('Notes', r.notes) +
     (r.attach ? `<div class="sumline"><span>Invoice</span><b>${attachLink(r, 'Open attachment')}</b></div>` : '') +
     line(r.status === 'Rejected' ? 'Rejected by' : 'Approved by', r.apprBy) + line('Decision time', r.apprAt) + line('Remark', r.apprRemark) +
     line('Paid by', r.paidBy) + line('Paid on', r.paidAt) + line('Payment ref.', r.payRef);
@@ -973,7 +985,7 @@ function seedDemo() {
   ];
 }
 function demoSubmit(d) {
-  const okp = { Sachin:'1111', Mudit:'2222', Rajesh:'3333', Jobiya:'6666', Arun:'4444' };
+  const okp = { Sachin:'1111', Mudit:'2222', Rajesh:'3333', Jobiya:'6666', Arun:'4444', Geyin:'5555' };
   if (okp[d.name] !== d.pin) throw new Error('Wrong PIN (preview PINs: Sachin 1111, Mudit 2222, Rajesh 3333, Jobiya 6666, Arun 4444)');
   const id = 'PR-DEMO-' + String(DATA.length + 1).padStart(3, '0');
   DATA.unshift({ id, by:d.name, payFrom:d.payFrom, vendor:d.vendor, amount:Number(d.amount), due:d.due, notes:d.notes, status:'Pending Approval', created:stamp(0),
