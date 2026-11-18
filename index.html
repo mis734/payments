@@ -98,6 +98,14 @@
   .from.sel.co-jain{background:#fdecec;border-color:#b91c1c;box-shadow:0 0 0 3px rgba(185,28,28,.12)}
   .from.sel.co-bb{background:#e6efff;border-color:#1d4ed8;box-shadow:0 0 0 3px rgba(29,78,216,.12)}
   .cotext{font-weight:700}
+  /* WhatsApp */
+  a.tag.wa{background:#e7f8ee;color:#0f7a43;text-decoration:none;cursor:pointer}
+  a.tag.wa:hover{background:#d2f2e0}
+  .btn-wa{background:#25d366;color:#fff;text-decoration:none}.btn-wa:hover{filter:brightness(.95)}
+  .wa-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px dashed var(--line)}
+  .wa-row:last-child{border-bottom:0}
+  .wa-row .t{flex:1;min-width:0}.wa-row .t b{display:block;font-size:14px}.wa-row .t span{font-size:12.5px;color:var(--muted)}
+  .wa-none{font-size:12px;color:var(--muted);text-align:right;max-width:170px}
   .payers{display:flex;gap:8px;flex-wrap:wrap}
   .payer{display:flex;align-items:center;gap:8px;border:1.5px solid var(--line);background:#fff;border-radius:22px;padding:6px 14px 6px 6px;cursor:pointer;font-weight:600;font-size:13.5px;color:var(--ink2);transition:.15s}
   .payer .av{width:26px;height:26px;font-size:12px}
@@ -451,6 +459,15 @@
   </div>
 </div>
 
+<!-- WhatsApp modal -->
+<div class="scrim" id="waScrim" style="z-index:60">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-h"><h3>💬 Send on WhatsApp</h3><p>Tap a button to open WhatsApp with the message ready, then press <b>Send</b>.</p></div>
+    <div class="modal-b" id="waList"></div>
+    <div class="modal-f"><button class="btn btn-ghost" id="waClose">Done</button></div>
+  </div>
+</div>
+
 <!-- Detail modal -->
 <div class="scrim" id="detScrim">
   <div class="modal">
@@ -482,7 +499,7 @@ const approverOf = by => (CFG.altApprovers || {})[by] || CFG.approver;
 const approverList = () => [...new Set([CFG.approver].concat(Object.values(CFG.altApprovers || {})))];
 let DATA = [], selName = '', selFrom = '', sortK = 'due', sortDir = 1;
 const PINS = {};                                        // remembered for this page only
-const COLORS = { Sachin:'#2563eb', Mudit:'#db2777', Rajesh:'#ea580c', Jobiya:'#16a34a', Arun:'#7c3aed', Geyin:'#0891b2' };
+const COLORS = { Sachin:'#2563eb', Mudit:'#db2777', Rajesh:'#ea580c', Jobiya:'#16a34a', Arun:'#7c3aed', Geyin:'#0891b2', PC:'#b45309' };
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -653,7 +670,9 @@ $('submitBtn').onclick = async () => {
     ['vendor','amount','due','notes'].forEach(k => $(k).value = '');
     selFrom = ''; document.querySelectorAll('.from').forEach(x => x.classList.remove('sel'));
     FILES = []; drawFile();
-    summary(); load();
+    summary(); await load(true);
+    const nr = DATA.find(x => x.id === id) || { id, by: data.name, vendor: data.vendor, amount: Number(data.amount), payFrom: data.payFrom, due: data.due, notes: data.notes };
+    showWhatsApp([{ name: approverOf(data.name), kind: 'approval' }], nr);
   } catch (e) { toast(e.message || String(e), false); }
   b.disabled = false; b.innerHTML = html;
 };
@@ -722,7 +741,9 @@ async function decide(id, decision, btn) {
   btn.disabled = true;
   try {
     const s = LIVE ? await call('decideRequest', id, pin, decision, remark) : demoDecide(id, decision, remark, pin, who);
-    toast(`${id} ${s.toLowerCase()}`); load();
+    toast(`${id} ${s.toLowerCase()}`);
+    await load(true);
+    afterDecision(DATA.find(x => x.id === id) || Object.assign({}, r, { apprBy: who, apprRemark: remark }), who, decision);
   } catch (e) { wrongPin(who, e); btn.disabled = false; }
 }
 async function pay(id, btn) {
@@ -734,7 +755,9 @@ async function pay(id, btn) {
   btn.disabled = true;
   try {
     LIVE ? await call('markPaid', id, pin, ref, who) : demoPay(id, ref, pin, who);
-    toast(`${id} marked as paid by ${who}`); load();
+    toast(`${id} marked as paid by ${who}`);
+    await load(true);
+    afterPaid(DATA.find(x => x.id === id) || Object.assign({}, r, { paidBy: who, payRef: ref }), who);
   } catch (e) { wrongPin(who, e); btn.disabled = false; }
 }
 
@@ -759,6 +782,84 @@ function tracker(r) {
     <div class="tk ${s3}"><div class="c">${s3 === 'done' ? '✓' : ''}</div>Paid<small>${s3 === 'done' ? esc(r.paidBy ? r.paidBy + ' · ' : '') + esc(short(r.paidAt)) : s3 === 'now' ? 'Waiting · Geyin / Arun' : ''}</small></div>
   </div>`;
 }
+/* ---------------- WhatsApp (tap-to-send) ---------------- */
+const phoneOf = n => (CFG.phones || {})[n] || '';
+const siteUrl = () => CFG.siteUrl || 'https://mis734.github.io/payments/';
+const WA_KIND = {
+  approval: { head: '🔔 *Approval needed*',            why: 'Please approve or reject this payment request.' },
+  pay:      { head: '💸 *Payment to be made*',          why: 'This payment has been approved. Please make the payment and mark it as paid.' },
+  approved: { head: '✅ *Your request was approved*',   why: 'It now goes for payment.' },
+  rejected: { head: '❌ *Your request was rejected*',   why: '' },
+  paid:     { head: '✔ *Payment completed*',            why: '' },
+  already:  { head: 'ℹ *Already paid – no action needed*', why: 'Please do not pay this again.' }
+};
+function waText(kind, r) {
+  const k = WA_KIND[kind], links = atts(r).filter(u => !u.startsWith('data:'));
+  const body = [
+    'Vendor: ' + r.vendor,
+    'Amount: ' + inr(r.amount),
+    r.payFrom ? 'Payment from: ' + r.payFrom : '',
+    r.due ? 'Due: ' + nice(r.due) : '',
+    'Requested by: ' + r.by,
+    r.notes ? 'Notes: ' + String(r.notes).slice(0, 300) : '',
+    (kind === 'approved' || kind === 'rejected') && r.apprBy ? 'By: ' + r.apprBy + (r.apprRemark ? ' – "' + r.apprRemark + '"' : '') : '',
+    (kind === 'paid' || kind === 'already') && r.paidBy ? 'Paid by: ' + r.paidBy + (r.payRef ? ' (Ref: ' + r.payRef + ')' : '') : '',
+    links.length ? 'Invoice: ' + links.join(' ') : ''
+  ].filter(Boolean);
+  return [k.head + ' – ' + r.id, ''].concat(body, k.why ? ['', k.why] : [], ['', 'Open: ' + siteUrl()]).join('\n');
+}
+function waLabel(kind) {
+  return { approval: 'needs to approve', pay: 'needs to make the payment', approved: 'requested it – tell them it is approved',
+           rejected: 'requested it – tell them it is rejected', paid: 'requested it – tell them it is paid', already: 'so it is not paid twice' }[kind];
+}
+function showWhatsApp(targets, r) {
+  const me = SESSION ? SESSION.name : '';
+  targets = targets.filter(t => t.name && t.name !== me);
+  if (!targets.length) return;
+  $('waList').innerHTML = targets.map(t => {
+    const ph = phoneOf(t.name);
+    const btn = ph
+      ? `<a class="btn btn-wa" href="https://wa.me/${ph}?text=${encodeURIComponent(waText(t.kind, r))}" target="_blank" rel="noopener">💬 Send to ${esc(t.name)}</a>`
+      : `<div class="wa-none">No WhatsApp number for ${esc(t.name)}. Add it in the sheet's <b>Contacts</b> tab (column C).</div>`;
+    return `<div class="wa-row"><div class="av" style="background:${COLORS[t.name] || '#475569'}">${esc(t.name[0])}</div>
+      <div class="t"><b>${esc(t.name)}</b><span>${esc(waLabel(t.kind))}</span></div>${btn}</div>`;
+  }).join('');
+  $('waScrim').classList.add('open');
+}
+$('waClose').onclick = () => $('waScrim').classList.remove('open');
+$('waScrim').addEventListener('click', e => { if (e.target === $('waScrim')) $('waScrim').classList.remove('open'); });
+function afterDecision(r, approver, decision) {
+  if (decision === 'approve') {
+    const payers = (CFG.payers || [CFG.payer]).filter(p => p !== approver);
+    const t = payers.map(p => ({ name: p, kind: 'pay' }));
+    if (payers.indexOf(r.by) === -1) t.push({ name: r.by, kind: 'approved' });
+    showWhatsApp(t, r);
+  } else showWhatsApp([{ name: r.by, kind: 'rejected' }], r);
+}
+function afterPaid(r, payer) {
+  const t = [];
+  if (r.by !== payer) t.push({ name: r.by, kind: 'paid' });
+  if (payer !== CFG.payer && r.by !== CFG.payer) t.push({ name: CFG.payer, kind: 'already' });
+  showWhatsApp(t, r);
+}
+function remindTargets(r) {
+  const me = SESSION ? SESSION.name : '';
+  if (r.status === 'Pending Approval') { const a = r.approver || approverOf(r.by); return a === me ? [] : [{ name: a, kind: 'approval' }]; }
+  if (r.status === 'Approved') {
+    const all = [CFG.payer].concat((CFG.payers || []).filter(p => p !== CFG.payer));
+    const first = all.filter(p => p !== me)[0];            // the main payer, or the backup if I am the main payer
+    return first ? [{ name: first, kind: 'pay' }] : [];
+  }
+  return [];
+}
+function remind(id) {
+  const r = DATA.find(x => x.id === id); if (r) showWhatsApp(remindTargets(r), r);
+}
+function remindTag(r) {
+  const t = remindTargets(r); if (!t.length) return '';
+  return `<a class="tag wa" href="#" onclick="event.preventDefault();event.stopPropagation();remind('${esc(r.id)}')">💬 Remind ${esc(t[0].name)}</a>`;
+}
+
 function card(r, act) {
   const over = r.status !== 'Paid' && r.status !== 'Rejected' && daysTo(r.due) < 0;
   return `<div class="rc ${over ? 'overdue' : ''}">
@@ -771,6 +872,7 @@ function card(r, act) {
       ${r.payFrom ? `<span class="tag co ${coClass(r.payFrom)}">🏢 ${esc(r.payFrom)}</span>` : ''}
       ${attachLink(r)}
       ${dueTag(r)}
+      ${remindTag(r)}
       <span class="tag">🕒 ${esc(r.created)}</span>
     </div>
     ${r.notes ? `<div class="rc-notes">${esc(r.notes)}</div>` : ''}
@@ -976,6 +1078,7 @@ async function load(quiet) {
 function stamp(dayOffset) { const d = new Date(); d.setDate(d.getDate() + dayOffset); return d.toLocaleDateString('en-IN', { day:'2-digit', month:'short', year:'numeric' }) + ', 10:30 AM'; }
 function dIso(o) { const d = new Date(); d.setDate(d.getDate() + o); return iso(d); }
 function seedDemo() {
+  CFG.phones = { Arun: '919800000001', Geyin: '919800000002', Sachin: '919800000003' };
   DATA = [
     { id:'PR-DEMO-005', payFrom:'Jain Wire EKM', by:'Rajesh', vendor:'Kerala Steel Traders', amount:245000, due:dIso(2), notes:'Invoice KST/1182 — MS wire rods', status:'Pending Approval', created:stamp(0) },
     { id:'PR-DEMO-004', payFrom:'Jain Wire CLT', by:'Mudit', vendor:'Sri Balaji Transport', amount:38500, due:dIso(-1), notes:'Freight for Oct dispatches', status:'Pending Approval', created:stamp(-2) },
