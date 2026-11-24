@@ -497,7 +497,7 @@ const coClass = n => /best\s*bond/i.test(n || '') ? 'co-bb' : /jain/i.test(n || 
 const coText = n => n ? `<span class="cotext ${coClass(n)}">${esc(n)}</span>` : '';
 const approverOf = by => (CFG.altApprovers || {})[by] || CFG.approver;
 const approverList = () => [...new Set([CFG.approver].concat(Object.values(CFG.altApprovers || {})))];
-let DATA = [], selName = '', selFrom = '', sortK = 'due', sortDir = 1;
+let DATA = [], selName = '', selFrom = '', sortK = 'paidTs', sortDir = -1;
 const PINS = {};                                        // remembered for this page only
 const COLORS = { Sachin:'#2563eb', Mudit:'#db2777', Rajesh:'#ea580c', Jobiya:'#16a34a', Arun:'#7c3aed', Geyin:'#0891b2', PC:'#b45309' };
 
