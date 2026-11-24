@@ -491,7 +491,7 @@ const GAS = typeof google !== 'undefined' && google.script && google.script.run;
 const API = !GAS && /^https:\/\/script\.google\.com\/.+\/exec$/.test(API_URL.trim());
 const LIVE = !!(GAS || API);
 let SESSION = null, refreshTimer = null;          // SESSION = { name, pin } of the signed-in person
-let CFG = { requesters:['Sachin','Mudit','Rajesh','Jobiya','Arun','Geyin'], altApprovers:{ Arun:'Sachin' }, payFrom:['Jain Wire EKM','Jain Wire CLT','Jain Wire Kannur','Best Bond'], approver:'Arun', payer:'Geyin', payers:['Geyin','Arun'] };
+let CFG = { requesters:['Sachin','Mudit','Rajesh','Jobiya','Arun','Geyin'], altApprovers:{ Arun:'Sachin' }, payFrom:['Jain Wire EKM','Jain Wire CLT','Jain Wire Kannur','Best Bond','Rahja Enterprises'], approver:'Arun', payer:'Geyin', payers:['Geyin','Arun'] };
 let selPayer = 'Geyin', selApprover = 'Arun';
 const coClass = n => /best\s*bond/i.test(n || '') ? 'co-bb' : /jain/i.test(n || '') ? 'co-jain' : '';
 const coText = n => n ? `<span class="cotext ${coClass(n)}">${esc(n)}</span>` : '';
